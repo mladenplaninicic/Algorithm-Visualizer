@@ -3,7 +3,7 @@ let model = (function () {
     let _colors = [];
     let _animations = [];
 
-    let maxRange = window.innerHeight - 150;
+    let maxRange = Math.round(window.innerHeight / 1.2);
 
     let initParameters = {
         maxRange: maxRange,
@@ -229,7 +229,7 @@ let model = (function () {
 let view = (function () {
     let _DEFAULT_COLOR = '#5EA6EE';
     let _COMPARE_COLOR = '#F53D3D'; 
-    let _SWAP_COLOR = '#3FB641'; //#008543
+    let _SWAP_COLOR = '#3FB641';
     let _DONE_COLOR = '#0D4A97';
 
     let interval;
@@ -249,6 +249,14 @@ let view = (function () {
 
     setElementHeight = function (element, height) {
         document.getElementById(`${element}`).style.height = height;
+    }
+
+    getElementValue = function(element){
+        return document.querySelector(element).value;
+    }
+
+    setElementValue = function(element, value){
+        document.querySelector(element).value = value;
     }
 
     setElementInnerText = function (element, text) {
@@ -276,7 +284,7 @@ let view = (function () {
                 let px = j + 'px';
                 setElementHeight(i, px);
 
-                if(array.length <= 18){
+                if(array.length < 15){
                     setElementInnerText(i, j);
                 }
                 
@@ -315,8 +323,9 @@ let view = (function () {
                 setElementHeight(j, valueForIinPixels);
 
                 let widthPx = document.getElementById(j).style.width; 
+                let width = widthPx.slice(0, widthPx.length - 2);
 
-                if(array.length <= 15 && widthPx > '30px'){
+                if(array.length <= 15 && width > 30){    
                     setElementInnerText(i, valueForJforDisplay);
                     setElementInnerText(j, valueForIforDisplay);
                 }
@@ -338,15 +347,15 @@ let view = (function () {
         },
 
         setInitialParameters: function () {
-            document.querySelector('.speedInputField').value = 200;
-            document.querySelector('.arraySizeInputField').value = 10;
+            setElementValue('.speedInputField', 200);
+            setElementValue('.arraySizeInputField', 10);
         },
 
         getParametersForAppInitialization: function () {
-            interval = document.querySelector('.speedInputField').value;
+            interval = getElementValue('.speedInputField');
             return {
-                interval: document.querySelector('.speedInputField').value,
-                arrayLength: document.querySelector('.arraySizeInputField').value
+                interval: getElementValue('.speedInputField'),
+                arrayLength: getElementValue('.arraySizeInputField')
             }
         },
 
@@ -356,6 +365,39 @@ let view = (function () {
                 COMPARE_COLOR: _COMPARE_COLOR,
                 SWAP_COLOR: _SWAP_COLOR
             }
+        },
+
+        setElementInnerTextWithClassSelector: function (element, text) {
+            document.querySelector(element).innerText = text;
+        },
+    
+        setElementBorder: function(element, border){
+            document.querySelector(element).style.border = border;
+        },
+
+        styleButtonAndSetAttribute: function(button, attribute, attributeValue, backgroundColor, color){
+            document.querySelector(button).setAttribute(attribute, attributeValue);
+            document.querySelector(button).style.backgroundColor = backgroundColor;
+            document.querySelector(button).style.color = color;
+        },
+
+        styleButtonAndRemoveAtrribute: function(button, attribute, backgroundColor, color){
+            document.querySelector(button).removeAttribute(attribute);
+            document.querySelector(button).style.backgroundColor = backgroundColor;
+            document.querySelector(button).style.color = color;
+        },
+
+        stylePseudoClass: function(backgroundColor){
+            var styleElem = document.head.appendChild(document.createElement("style"));
+            styleElem.innerHTML = `.btn.sortButton:before {background: ${backgroundColor};}`;
+        },
+
+        setSpinnerVisibility: function(spiner, visibility){
+            document.querySelector(spiner).style.visibility = visibility;
+        },
+
+        setPointerEvent: function(element, pointerEvent){
+            document.querySelector(element).style.pointerEvents = pointerEvent;
         },
 
         resetView: function(){
@@ -371,42 +413,42 @@ let controller = (function (model, view) {
     let initParameters = {
         interval: 0
     }
-    // refactor
+
     validateInput = function(speed, arraySize){
         let result = true;
 
         if(speed < 10 || speed > 1000){
             if(speed < 10){
-                document.querySelector('.speedValidation').innerText = 'Min speed is 10ms';
+                view.setElementInnerTextWithClassSelector('.speedValidation', 'Min speed is 10ms');
             }
 
             if(speed > 1000){
-                document.querySelector('.speedValidation').innerText = 'Max speed is 1000ms';
+                view.setElementInnerTextWithClassSelector('.speedValidation', 'Max speed is 1000ms');
             }
             result = false;
-            document.querySelector('.speedInputField').style.border = '1.5px solid #F53D3D';
+            view.setElementBorder('.speedInputField', '1.5px solid #F53D3D');
         }
 
         if(arraySize < 4 || arraySize > 120){
             if(arraySize < 4){
-                document.querySelector('.arraySizeValidation').innerText = 'Min size is 4';
+                view.setElementInnerTextWithClassSelector('.arraySizeValidation', 'Min size is 4');
             }
 
             if(arraySize > 120){
-                document.querySelector('.arraySizeValidation').innerText = 'Max size is 120';
+                view.setElementInnerTextWithClassSelector('.arraySizeValidation', 'Max size is 120');
             }
             result = false;
-            document.querySelector('.arraySizeInputField').style.border = '1.5px solid #F53D3D';
+            view.setElementBorder('.arraySizeInputField', '1.5px solid #F53D3D');
         }
   
         if(!result){
             return result;
         }
 
-        document.querySelector('.speedInputField').style.border = 'none';
-        document.querySelector('.arraySizeInputField').style.border = 'none';
-        document.querySelector('.speedValidation').innerText = '';
-        document.querySelector('.arraySizeValidation').innerText = '';
+        view.setElementBorder('.speedInputField', 'none');
+        view.setElementBorder('.arraySizeInputField', 'none');
+        view.setElementInnerTextWithClassSelector('.speedValidation', '');
+        view.setElementInnerTextWithClassSelector('.arraySizeValidation', '');
         return true;
     }
 
@@ -425,15 +467,16 @@ let controller = (function (model, view) {
         array = model.getArray();
         colors = model.getColorsArray();
 
-        let width = document.querySelector(".wrapper").offsetWidth;
+        let screenWidth = document.querySelector(".wrapper").offsetWidth;
 
         view.drawArray(array, colors);
 
         let bars = document.querySelectorAll('.sort');
-        let widthPx = width / initParams.arrayLength / 2 + 'px';
+        let width = screenWidth / initParams.arrayLength / 2;
+        let widthPx = Math.round(width) + 'px';
         bars.forEach((item) => {
             item.style.width = widthPx;
-            if(initParams.arrayLength > 15 || widthPx < '30px'){
+            if(initParams.arrayLength > 15 || width < 30){
                 item.innerText = '';
             }
         });
@@ -441,14 +484,9 @@ let controller = (function (model, view) {
     }
 
     initialization = function () {
-        document.querySelector('.sortButton').setAttribute('disabled', 'true');
-        document.querySelector('.sortButton').style.backgroundColor = 'transparent';
-        document.querySelector('.sortButton').style.color = '#ECECEC';
-
-        var styleElem = document.head.appendChild(document.createElement("style"));
-        styleElem.innerHTML = ".btn.sortButton:before {background: #F53D3D;}";
-
-        document.querySelector('.spinner').style.visibility = 'hidden';
+        view.styleButtonAndSetAttribute('.sortButton', 'disabled', 'true', 'transparent', '#ECECEC');
+        view.stylePseudoClass('#F53D3D');
+        view.setSpinnerVisibility('.spinner', 'hidden');
 
         view.setInitialParameters();
         let colors = view.getColors();
@@ -461,23 +499,13 @@ let controller = (function (model, view) {
 
             if (selectedAlgorithms.length > 0) {
                 selectedAlgorithms[0].classList.remove('selected');
-
-                document.querySelector('.sortButton').removeAttribute('disabled');
-                document.querySelector('.sortButton').style.backgroundColor = 'transparent';
-                document.querySelector('.sortButton').style.color = '#ECECEC';
-
-                var styleElem = document.head.appendChild(document.createElement("style"));
-                styleElem.innerHTML = ".btn.sortButton:before {background: #5EA6EE;}";
+                view.styleButtonAndRemoveAtrribute('.sortButton', 'disabled', 'transparent', '#ECECEC');
+                view.stylePseudoClass('#5EA6EE');
 
                 selectedAlgorithms.pop();
             }
-
-            document.querySelector('.sortButton').removeAttribute('disabled');
-            document.querySelector('.sortButton').style.backgroundColor = '#ECECEC';
-            document.querySelector('.sortButton').style.color = 'black';
-
-            var styleElem = document.head.appendChild(document.createElement("style"));
-            styleElem.innerHTML = ".btn.sortButton:before {background: #5EA6EE;}";
+            view.styleButtonAndRemoveAtrribute('.sortButton', 'disabled', '#ECECEC', 'black');
+            view.stylePseudoClass('#5EA6EE');
 
             let el = e.target;
             el.classList.add('selected');
@@ -499,9 +527,8 @@ let controller = (function (model, view) {
             if(!valid){
                 return;
             }
-
-            document.querySelector('.spinner').style.visibility = 'visible';
-            document.querySelector('.header').style.pointerEvents = 'none';
+            view.setSpinnerVisibility('.spinner', 'visible');
+            view.setPointerEvent('.header', 'none');
 
             model.setInitParameters(initParams);
             initParameters.interval = initParams.interval;
@@ -536,8 +563,8 @@ let controller = (function (model, view) {
         let interval = setInterval(() => {
             if (animations.length == 0) {
                 customClearInterval(interval);
-                document.querySelector('.spinner').style.visibility = 'hidden';
-                document.querySelector('.header').style.pointerEvents = 'auto';
+                view.setSpinnerVisibility('.spinner', 'hidden');
+                view.setPointerEvent('.header', 'auto');
                 document.querySelector('.header').setAttribute('readonly', 'true');
             } else {
                 view.animate(animations, array);
@@ -555,7 +582,3 @@ let controller = (function (model, view) {
 })(model, view);
 
 controller.init();
-
-// TO DO
-//
-// 5. Code refactor and optimization
