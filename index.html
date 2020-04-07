@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="style.css">
+    <title>Algorithm Visualizer</title>
+</head>
+
+<body>
+    <div class="header">
+        <div class="logo">
+            <h3>Algorithm Visualizer</h3>
+        </div>
+        <div class="firstSectionWrapper">
+            <div class="speed">
+                <label for="speed">Speed (in ms)</label>
+                <input class="speedInputField" type="number" min="10" max="1000" value="200" required>
+                <span class="speedValidation"></span>
+            </div>
+            <div class="arraySize">
+                <label for="arraySize">Array size</label>
+                <input class="arraySizeInputField" type="number" min="4" max="120" value="10" required>
+                <span class="arraySizeValidation"></span>
+            </div>
+            <button class="btn generateArray fade" type="submit">Generate Array</button>
+        </div>
+        <div class="spacer"></div>
+
+        <div class="algorithms">
+            <div class="algorithmButton">Bubble Sort</div>
+            <div class="algorithmButton">Selection Sort</div>
+            <div class="algorithmButton">Insertion Sort</div>
+            <div class="algorithmButton">Quick Sort</div>
+            <div class="algorithmButton">Merge Sort</div>
+        </div>
+
+        <div class="spacer"></div>
+
+        <button class="btn sortButton">Sort</button>
+
+        <div class="spinner">
+            <div class="spinnerText">Sorting</div>
+            <div class="spinnerSector spinnerSectorRed"></div>
+            <div class="spinnerSector spinnerSectorBlue"></div>
+            <div class="spinnerSector spinnerSectorGreen"></div>
+        </div>
+    </div>
+    <div class="wrapper"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
